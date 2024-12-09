@@ -8,6 +8,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,9 @@ import java.util.*;
 
 @RestController
 public class UsuarioController {
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     private UsuarioService service;
@@ -62,6 +66,7 @@ public class UsuarioController {
                     .body(Collections
                             .singletonMap("mensaje", "Ya existe! un usuario con ese email electrónico!"));
         }
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(usuario));
     }
 
@@ -85,7 +90,8 @@ public class UsuarioController {
 
             usuarioDb.setNombre(usuario.getNombre());
             usuarioDb.setEmail(usuario.getEmail());
-            usuarioDb.setPassword(usuario.getPassword());
+            usuarioDb.setPassword(passwordEncoder.encode(usuario.getPassword()));
+
             return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(usuarioDb));
         }
         return ResponseEntity.notFound().build();
@@ -104,6 +110,20 @@ public class UsuarioController {
     @GetMapping("/usuarios-por-curso")
     public ResponseEntity<?> obtenerAlumnosPorCurso(@RequestParam List<Long> ids){
         return ResponseEntity.ok(service.listarPorIds(ids));
+    }
+
+    @GetMapping("/authorized")
+    public Map<String, Object> authorized(@RequestParam(name = "code") String code) {
+        return Collections.singletonMap("code", code);
+    }
+
+    @GetMapping("/login")
+    public ResponseEntity<?> loginByEmail(@RequestParam String email) {
+        Optional<Usuario> o = service.porEmail(email);
+        if (o.isPresent()) {
+            return ResponseEntity.ok(o.get());
+        }
+        return ResponseEntity.notFound().build();
     }
 
     private ResponseEntity<Map<String, String>> validar(BindingResult result) {
