@@ -12,7 +12,7 @@ spec:
     - ReadWriteMany
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: [FileSystemId]
+    volumeHandle: fs-0b8792b3fcf6799de
 #    - ReadWriteOnce
 #  hostPath:
 #    path: /var/lib/mysql

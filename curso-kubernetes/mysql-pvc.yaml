@@ -6,7 +6,7 @@ spec:
   volumeName: mysql-pv
   accessModes:
     - ReadWriteMany
-#    - ReadWriteOnce
+#    - ReadWriteOnceOnce
   storageClassName: ""
 #  storageClassName: standard
   resources:
